@@ -1,4 +1,3 @@
-
 #include "common.hpp"
 
 __global__ void kernel(const real *A, size_t size, real *result)
