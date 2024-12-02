@@ -2,7 +2,7 @@
 
 void reduce(const real *A, const size_t size, real *B)
 {
-    real sum = 0;
+    real sum = 0.0;
     for (size_t i = 0; i < size; ++i) {
         sum += A[i];
     }
