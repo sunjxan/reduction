@@ -18,7 +18,7 @@ void init(real *data, const size_t size, const real value)
     }
 }
 
-real timing(const real *A, const size_t size, real *B)
+real timing(const real *A, const size_t size, real *result)
 {
     float elapsed_time = 0;
     cudaEvent_t start, stop;
@@ -26,7 +26,7 @@ real timing(const real *A, const size_t size, real *B)
     CHECK(cudaEventCreate(&stop));
     CHECK(cudaEventRecord(start, 0));
 
-    reduce(A, size, B);
+    reduce(A, size, result);
 
     CHECK(cudaEventRecord(stop, 0));
     CHECK(cudaEventSynchronize(stop));
@@ -38,62 +38,54 @@ real timing(const real *A, const size_t size, real *B)
 
 void launch_cpu()
 {
-    real *h_A, *h_B;
+    real *h_A, result;
     CHECK(cudaMallocHost(&h_A, N_size));
-    CHECK(cudaMallocHost(&h_B, real_size));
 
     init(h_A, N, element);
 
     float elapsed_time = 0, total_time = 0;
     for (unsigned i = 0; i < SKIP; ++i) {
-        elapsed_time = timing(h_A, N, h_B);
+        elapsed_time = timing(h_A, N, &result);
     }
     for (unsigned i = 0; i < REPEATS; ++i) {
-        elapsed_time = timing(h_A, N, h_B);
+        elapsed_time = timing(h_A, N, &result);
         total_time += elapsed_time;
     }
     printf("Time: %9.3f ms\n", total_time / REPEATS);
 
-    const real answer = element * N, &result = *h_B;
+    const real answer = element * N;
     real absolute_error = fabs(result - answer), relative_error = absolute_error / answer * 100;
     printf("Result: %16.6f  Answer: %16.6f  Error: %16.6f %6.2f%%\n", result, answer, absolute_error, relative_error);
 
     CHECK(cudaFreeHost(h_A));
-    CHECK(cudaFreeHost(h_B));
 }
 
 void launch_gpu()
 {
-    real *h_A, *h_B;
+    real *h_A, result;
     CHECK(cudaMallocHost(&h_A, N_size));
-    CHECK(cudaMallocHost(&h_B, real_size));
 
     init(h_A, N, element);
 
-    real *d_A, *d_B;
+    real *d_A;
     CHECK(cudaMalloc(&d_A, N_size));
-    CHECK(cudaMalloc(&d_B, real_size));
 
     CHECK(cudaMemcpy(d_A, h_A, N_size, cudaMemcpyHostToDevice));
-    CHECK(cudaMemcpy(d_B, h_B, real_size, cudaMemcpyHostToDevice));
 
     float elapsed_time = 0, total_time = 0;
     for (unsigned i = 0; i < SKIP; ++i) {
-        elapsed_time = timing(d_A, N, d_B);
+        elapsed_time = timing(d_A, N, &result);
     }
     for (unsigned i = 0; i < REPEATS; ++i) {
-        elapsed_time = timing(d_A, N, d_B);
+        elapsed_time = timing(d_A, N, &result);
         total_time += elapsed_time;
     }
     printf("Time: %9.3f ms\n", total_time / REPEATS);
 
-    CHECK(cudaMemcpy(h_B, d_B, real_size, cudaMemcpyDeviceToHost));
-    const real answer = element * N, &result = *h_B;
+    const real answer = element * N;
     real absolute_error = fabs(result - answer), relative_error = absolute_error / answer * 100;
     printf("Result: %16.6f  Answer: %16.6f  Error: %16.6f %6.2f%%\n", result, answer, absolute_error, relative_error);
 
     CHECK(cudaFree(d_A));
-    CHECK(cudaFree(d_B));
     CHECK(cudaFreeHost(h_A));
-    CHECK(cudaFreeHost(h_B));
 }
