@@ -7,7 +7,7 @@ constexpr unsigned SKIP = 5, REPEATS = 5;
 constexpr size_t N = 1e8;
 constexpr size_t real_size = sizeof(real);
 constexpr size_t N_size = N * real_size;
-constexpr real element = 1.23f;
+constexpr real element = 1.23;
 
 void reduce(const real *, const size_t, real *);
 
