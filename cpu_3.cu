@@ -1,5 +1,7 @@
 #include "common.hpp"
 
+// 递归二分，相邻配对
+
 real calc(const real *x, size_t l, size_t r)
 {
     if (l >= r) {

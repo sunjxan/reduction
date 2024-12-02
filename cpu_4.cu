@@ -1,6 +1,8 @@
 #include "common.hpp"
 
-void reduce(const real *A, const size_t size, real *B)
+// 迭代二分，相邻配对
+
+void reduce(const real *A, size_t size, real *B)
 {
     real sum = 0.0;
     size_t l = 0, r = size;
