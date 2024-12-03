@@ -1,37 +1,30 @@
 #include "common.hpp"
 
-// 分两段交错配对
+// 递归二分，交错配对
 
-void reduce(const real *A, size_t size, real *B)
+real calc(real *A, size_t size)
 {
-    size_t offset = 1;
-    while (offset < size) {
-        offset <<= 1;
+    if (size == 1) {
+        return A[0];
     }
-    offset >>= 1;
-
-    real *C;
-    CHECK(cudaMallocHost(&C, offset * real_size));
-
-    bool first = true;
-    while (offset) {
-        for (size_t pos = 0; pos < offset; ++pos) {
-            size_t target = pos + offset;
-            if (first) {
-                C[pos] = A[pos];
-                if (target < size) {
-                    C[pos] += A[target];
-                }
-            } else if (target < size) {
-                C[pos] += C[target];
-            }
+    size_t stride = (size + 1) >> 1;
+    for (size_t i = 0; i < stride; ++i) {
+        size_t target = i + stride;
+        if (target < size) {
+            A[i] += A[target];
         }
-        offset >>= 1;
-        first = false;
     }
-    B[0] = C[0];
+    return calc(A, stride);
+}
 
-    CHECK(cudaFreeHost(C));
+void reduce(const real *A, size_t size, real *result)
+{
+    real *B;
+    size_t total_size = size * real_size;
+    CHECK(cudaMallocHost(&B, total_size));
+    CHECK(cudaMemcpy(B, A, total_size, cudaMemcpyHostToHost));
+    *result = calc(B, size);
+    CHECK(cudaFreeHost(B));
 }
 
 int main()

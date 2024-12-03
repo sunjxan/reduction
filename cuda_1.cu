@@ -9,15 +9,15 @@ __global__ void kernel(const real *A, size_t size, real *result)
     *result = sum;
 }
 
-void reduce(const real *A, size_t size, real *result)
+void reduce(const real *d_A, size_t size, real *h_result)
 {
     real *d_result;
     CHECK(cudaMalloc(&d_result, real_size));
 
-    kernel<<<1, 1>>>(A, size, d_result);
+    kernel<<<1, 1>>>(d_A, size, d_result);
     CHECK(cudaDeviceSynchronize());
 
-    CHECK(cudaMemcpy(result, d_result, real_size, cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));
     CHECK(cudaFree(d_result));
 }
 

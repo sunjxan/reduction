@@ -2,7 +2,7 @@
 
 // 迭代二分，相邻配对
 
-void reduce(const real *A, size_t size, real *B)
+void reduce(const real *A, size_t size, real *result)
 {
     real sum = 0.0;
     size_t l = 0, r = size;
@@ -51,7 +51,7 @@ void reduce(const real *A, size_t size, real *B)
         ++top;
         r = mid;
     }
-    B[0] = sum;
+    *result = sum;
 }
 
 int main()

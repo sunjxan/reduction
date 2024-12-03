@@ -16,28 +16,28 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t group_count, 
     }
 }
 
-void reduce(const real *A, size_t size, real *result)
+void reduce(const real *d_A, size_t size, real *h_result)
 {
     const size_t group_count = 1e6, group_size = DIVUP(size, group_count), total_size = group_count * real_size;
 
-    real *B, *h_B;
-    CHECK(cudaMalloc(&B, total_size));
+    real *d_B, *h_B;
+    CHECK(cudaMalloc(&d_B, total_size));
     CHECK(cudaMallocHost(&h_B, total_size));
 
     unsigned block_size = 128, grid_size = DIVUP(group_count, block_size);
-    kernel<<<grid_size, block_size>>>(A, size, B, group_count, group_size);
+    kernel<<<grid_size, block_size>>>(d_A, size, d_B, group_count, group_size);
     CHECK(cudaDeviceSynchronize());
 
-    CHECK(cudaMemcpy(h_B, B, total_size, cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(h_B, d_B, total_size, cudaMemcpyDeviceToHost));
 
     real sum = 0.0;
     for (size_t i = 0; i < group_count; ++i) {
         sum += h_B[i];
     }
-    *result = sum;
+    *h_result = sum;
 
     CHECK(cudaFreeHost(h_B));
-    CHECK(cudaFree(B));
+    CHECK(cudaFree(d_B));
 }
 
 int main()
