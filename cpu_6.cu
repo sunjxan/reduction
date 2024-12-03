@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-// 迭代二分，交错配对
+// 迭代折半，交错配对
 
 void reduce(const real *A, size_t size, real *result)
 {

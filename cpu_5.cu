@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-// 递归二分，交错配对
+// 递归折半，交错配对
 
 real calc(real *A, size_t size)
 {
