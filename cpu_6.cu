@@ -9,16 +9,14 @@ void reduce(const real *A, size_t size, real *result)
     CHECK(cudaMallocHost(&B, total_size));
     CHECK(cudaMemcpy(B, A, total_size, cudaMemcpyHostToHost));
 
-    size_t stride = (size + 1) >> 1;
-    while (size > 1) {
+    for (size_t last_stride = size; last_stride > 1; ) {
+        size_t stride = (last_stride + 1) >> 1;
         for (size_t i = 0; i < stride; ++i) {
-            size_t target = i + stride;
-            if (target < size) {
-                B[i] += B[target];
+            if (i + stride < last_stride) {
+                B[i] += B[i + stride];
             }
         }
-        size = stride;
-        stride = (size + 1) >> 1;
+        last_stride = stride;
     }
     *result = B[0];
 

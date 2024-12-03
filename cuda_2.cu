@@ -5,9 +5,10 @@
 __global__ void kernel(const real *A, size_t size, real *result)
 {
     unsigned idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < size) {
-        atomicAdd(result, A[idx]);
+    if (idx >= size) {
+        return;
     }
+    atomicAdd(result, A[idx]);
 }
 
 void reduce(const real *d_A, size_t size, real *h_result)

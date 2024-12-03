@@ -9,9 +9,8 @@ real calc(real *A, size_t size)
     }
     size_t stride = (size + 1) >> 1;
     for (size_t i = 0; i < stride; ++i) {
-        size_t target = i + stride;
-        if (target < size) {
-            A[i] += A[target];
+        if (i + stride < size) {
+            A[i] += A[i + stride];
         }
     }
     return calc(A, stride);
