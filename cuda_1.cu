@@ -11,7 +11,7 @@ __global__ void kernel(const real *A, size_t size, real *result)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    real *d_result;
+    real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
 
     kernel<<<1, 1>>>(d_A, size, d_result);

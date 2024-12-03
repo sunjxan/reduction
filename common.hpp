@@ -38,7 +38,7 @@ real timing(const real *A, const size_t size, real *result)
 
 void launch_cpu()
 {
-    real *h_A, result;
+    real *h_A = nullptr, result = 0.0;
     CHECK(cudaMallocHost(&h_A, N_size));
 
     init(h_A, N, element);
@@ -62,12 +62,12 @@ void launch_cpu()
 
 void launch_gpu()
 {
-    real *h_A, result;
+    real *h_A = nullptr, result = 0.0;
     CHECK(cudaMallocHost(&h_A, N_size));
 
     init(h_A, N, element);
 
-    real *d_A;
+    real *d_A = nullptr;
     CHECK(cudaMalloc(&d_A, N_size));
 
     CHECK(cudaMemcpy(d_A, h_A, N_size, cudaMemcpyHostToDevice));

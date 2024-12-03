@@ -12,7 +12,7 @@ __global__ void kernel(const real *A, size_t size, real *result)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    real *d_result;
+    real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
 
     unsigned block_size = 1024, grid_size = DIVUP(size, block_size);

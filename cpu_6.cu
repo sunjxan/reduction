@@ -4,7 +4,7 @@
 
 void reduce(const real *A, size_t size, real *result)
 {
-    real *B;
+    real *B = nullptr;
     size_t total_size = size * real_size;
     CHECK(cudaMallocHost(&B, total_size));
     CHECK(cudaMemcpy(B, A, total_size, cudaMemcpyHostToHost));

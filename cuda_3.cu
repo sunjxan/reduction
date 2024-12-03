@@ -1,15 +1,11 @@
 #include "common.hpp"
 
-__global__ void kernel(const real *A, size_t size, real *B, size_t group_count, size_t group_size)
+__global__ void kernel(const real *A, size_t size, real *B, size_t group_count)
 {
     unsigned idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < group_count) {
-        unsigned beg = idx * group_size, end = beg + group_size;
-        if (end > size) {
-            end = size;
-        }
         real sum = 0.0;
-        for (size_t i = beg; i < end; ++i) {
+        for (size_t i = idx; i < size; i += group_count) {
             sum += A[i];
         }
         B[idx] = sum;
@@ -18,14 +14,14 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t group_count, 
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    const size_t group_count = 1e6, group_size = DIVUP(size, group_count), total_size = group_count * real_size;
+    const size_t group_count = 1 << 20, total_size = group_count * real_size;
 
-    real *d_B, *h_B;
+    real *d_B = nullptr, *h_B = nullptr;
     CHECK(cudaMalloc(&d_B, total_size));
     CHECK(cudaMallocHost(&h_B, total_size));
 
-    unsigned block_size = 128, grid_size = DIVUP(group_count, block_size);
-    kernel<<<grid_size, block_size>>>(d_A, size, d_B, group_count, group_size);
+    unsigned block_size = 1024, grid_size = DIVUP(group_count, block_size);
+    kernel<<<grid_size, block_size>>>(d_A, size, d_B, group_count);
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_B, d_B, total_size, cudaMemcpyDeviceToHost));
