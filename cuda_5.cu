@@ -19,7 +19,7 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count,
     real *Bx = B + bid * bdx;
     for (size_t last_stride = bdx; last_stride > 1; ) {
         size_t stride = (last_stride + 1) >> 1;
-        if (tid < stride && tid + stride < last_stride && idx + stride < thread_count) {
+        if (tid + stride < last_stride && idx + stride < thread_count) {
             Bx[tid] += Bx[tid + stride];
         }
         last_stride = stride;
