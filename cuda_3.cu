@@ -17,12 +17,12 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    size_t thread_count = 1 << 20, total_size = thread_count * real_size;
+    size_t thread_count = DIVUP(size, 128), total_size = thread_count * real_size;
     real *d_B = nullptr, *h_B = nullptr;
     CHECK(cudaMalloc(&d_B, total_size));
     CHECK(cudaMallocHost(&h_B, total_size));
 
-    unsigned block_size = 1024, grid_size = DIVUP(thread_count, block_size);
+    unsigned block_size = 256, grid_size = DIVUP(thread_count, block_size);
     kernel<<<grid_size, block_size>>>(d_A, size, d_B, thread_count);
     CHECK(cudaDeviceSynchronize());
 
