@@ -9,7 +9,7 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count,
         return;
     }
 
-    size_t pos = idx << 1;
+    size_t pos = idx * 2;
     real v = A[pos];
     if (pos + 1 < size) {
         v += A[pos + 1];
@@ -35,7 +35,7 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count,
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    size_t thread_count = (size + 1) >> 1;
+    size_t thread_count = DIVUP(size, 2);
     real *d_B = nullptr;
     CHECK(cudaMalloc(&d_B, thread_count * real_size));
 
