@@ -23,8 +23,6 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count,
         // 添加边界检查
         if (!(tid % next_stride) && tid + stride < bdx && idx + stride < thread_count) {
             Bx[tid] += Bx[tid + stride];
-        } else {
-            break;
         }
         stride = next_stride;
         __syncthreads();

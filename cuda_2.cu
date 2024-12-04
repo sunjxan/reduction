@@ -15,6 +15,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
 {
     real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
+    CHECK(cudaMemset(d_result, 0, real_size));
 
     unsigned block_size = 1024, grid_size = DIVUP(size, block_size);
     kernel<<<grid_size, block_size>>>(d_A, size, d_result);
