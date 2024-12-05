@@ -21,3 +21,5 @@ nvcc -O2 -std=c++17 -Xcompiler -Wall cuda_4.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cuda_4.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall cuda_5.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cuda_5.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall cuda_6.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cuda_6.cu -o a && ./a
