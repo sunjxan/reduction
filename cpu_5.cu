@@ -4,6 +4,9 @@
 
 real calc(real *A, size_t size)
 {
+    if (!size) {
+        return 0.0;
+    }
     if (size == 1) {
         return A[0];
     }
