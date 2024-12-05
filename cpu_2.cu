@@ -1,19 +1,23 @@
+#include <cmath>
+
 #include "common.hpp"
 
-// Kahan's Summation Formula 算法
-// 一种用于减少浮点数加法运算中累积舍入误差的算法。
-// 该算法通过维护一个补偿变量c来减少误差，使得求和的结果更加精确。
+// 分多组，分别求和再计算总和
 
 void reduce(const real *A, size_t size, real *result)
 {
-    real sum = 0.0, c = 0.0;
-    for (size_t i = 0; i < size; ++i) {
-        real y = A[i] - c;
-        real t = sum + y;
-        c = t - sum - y;
-        sum = t;
+    unsigned stride = ceil(sqrt(size));
+
+    real sum = 0.0;
+    for (size_t i = 0; i < stride; ++i) {
+        real v = 0.0;
+        for (size_t j = i; j < size; j += stride) {
+            v += A[j];
+        }
+        sum += v;
     }
-    *result = sum - c;
+
+    *result = sum;
 }
 
 int main()
