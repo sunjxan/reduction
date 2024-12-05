@@ -69,7 +69,7 @@ void launch_cpu()
     printf("Time: %9.3f ms\n", total_time / REPEATS);
 
     real answer = get_answer(h_A, N);
-    real absolute_error = fabs(result - answer), relative_error = absolute_error / answer * 100;
+    real absolute_error = fabs(result - answer), relative_error = answer ? absolute_error / answer * 100 : (absolute_error ? 100 : 0);
     printf("Result: %16.6f  Answer: %16.6f  Error: %16.6f %6.2f%%\n", result, answer, absolute_error, relative_error);
 
     CHECK(cudaFreeHost(h_A));
@@ -98,7 +98,7 @@ void launch_gpu()
     printf("Time: %9.3f ms\n", total_time / REPEATS);
 
     real answer = get_answer(h_A, N);
-    real absolute_error = fabs(result - answer), relative_error = absolute_error / answer * 100;
+    real absolute_error = fabs(result - answer), relative_error = answer ? absolute_error / answer * 100 : (absolute_error ? 100 : 0);
     printf("Result: %16.6f  Answer: %16.6f  Error: %16.6f %6.2f%%\n", result, answer, absolute_error, relative_error);
 
     CHECK(cudaFree(d_A));
