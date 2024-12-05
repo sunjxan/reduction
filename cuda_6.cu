@@ -39,6 +39,11 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count,
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
+    if (!size) {
+        *h_result = 0.0;
+        return;
+    }
+
     unsigned times = 10;
     size_t thread_count = DIVUP(size, times);
     real *d_B = nullptr;

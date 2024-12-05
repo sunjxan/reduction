@@ -21,11 +21,6 @@ real calc(real *A, size_t size)
 
 void reduce(const real *A, size_t size, real *result)
 {
-    if (!size) {
-        *result = 0.0;
-        return;
-    }
-
     real *B = nullptr;
     size_t total_size = size * real_size;
     CHECK(cudaMallocHost(&B, total_size));

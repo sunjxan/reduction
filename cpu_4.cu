@@ -4,11 +4,6 @@
 
 void reduce(const real *A, size_t size, real *result)
 {
-    if (!size) {
-        *result = 0.0;
-        return;
-    }
-
     size_t l = 0, r = size;
     // top - 1 是栈顶元素指针
     size_t ls[30], rs[30], top = 0, last_l = 0;
@@ -40,6 +35,14 @@ void reduce(const real *A, size_t size, real *result)
                     vs[top - 1] += v;
                 }
             }
+        } else if (l >= r) {
+            if (!top) {
+                vs[0] = 0.0;
+                break;
+            }
+            last_l = l;
+            l = ls[top - 1];
+            r = rs[top - 1];
         } else if (l + 1 == r) {
             // 第一次到达该结点
             real v = A[l];
