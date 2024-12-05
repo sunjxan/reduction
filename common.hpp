@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <cmath>
 
 #include "error.h"
 
@@ -7,15 +8,29 @@ constexpr unsigned SKIP = 5, REPEATS = 5;
 constexpr size_t N = 1e8 + 7;
 constexpr size_t real_size = sizeof(real);
 constexpr size_t N_size = N * real_size;
-constexpr real element = 1.23;
 
 void reduce(const real *, const size_t, real *);
 
-void init(real *data, const size_t size, const real value)
+void random_init(real *data, const size_t size)
 {
     for (size_t i = 0; i < size; ++i) {
-        data[i] = value;
+        data[i] = real(rand()) / RAND_MAX;
     }
+}
+
+// Kahan's Summation Formula 算法
+// 一种用于减少浮点数加法运算中累积舍入误差的算法。
+// 该算法通过维护一个补偿变量c来减少误差，使得求和的结果更加精确。
+real get_answer(const real *A, size_t size)
+{
+    real sum = 0.0, c = 0.0;
+    for (size_t i = 0; i < size; ++i) {
+        real y = A[i] - c;
+        real t = sum + y;
+        c = t - sum - y;
+        sum = t;
+    }
+    return sum - c;
 }
 
 real timing(const real *A, const size_t size, real *result)
@@ -41,7 +56,7 @@ void launch_cpu()
     real *h_A = nullptr, result = 0.0;
     CHECK(cudaMallocHost(&h_A, N_size));
 
-    init(h_A, N, element);
+    random_init(h_A, N);
 
     float elapsed_time = 0, total_time = 0;
     for (unsigned i = 0; i < SKIP; ++i) {
@@ -53,7 +68,7 @@ void launch_cpu()
     }
     printf("Time: %9.3f ms\n", total_time / REPEATS);
 
-    const real answer = element * N;
+    real answer = get_answer(h_A, N);
     real absolute_error = fabs(result - answer), relative_error = absolute_error / answer * 100;
     printf("Result: %16.6f  Answer: %16.6f  Error: %16.6f %6.2f%%\n", result, answer, absolute_error, relative_error);
 
@@ -65,7 +80,7 @@ void launch_gpu()
     real *h_A = nullptr, result = 0.0;
     CHECK(cudaMallocHost(&h_A, N_size));
 
-    init(h_A, N, element);
+    random_init(h_A, N);
 
     real *d_A = nullptr;
     CHECK(cudaMalloc(&d_A, N_size));
@@ -82,7 +97,7 @@ void launch_gpu()
     }
     printf("Time: %9.3f ms\n", total_time / REPEATS);
 
-    const real answer = element * N;
+    real answer = get_answer(h_A, N);
     real absolute_error = fabs(result - answer), relative_error = absolute_error / answer * 100;
     printf("Result: %16.6f  Answer: %16.6f  Error: %16.6f %6.2f%%\n", result, answer, absolute_error, relative_error);
 
