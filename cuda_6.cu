@@ -37,11 +37,6 @@ __global__ void kernel(const real *A, size_t size, real *B)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    if (!size) {
-        *h_result = 0.0;
-        return;
-    }
-
     // 以1:times的比例估算需要的线程数groups，block_size应是2的整数幂
     unsigned times = 10, groups = DIVUP(size, times), block_size = 1024, grid_size = DIVUP(groups, block_size);
     size_t B_size = grid_size * real_size;
@@ -55,6 +50,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     // 保证grid_size=1,block_size=1024的kernel能完成全部计算
     real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
+    CHECK(cudaMemset(d_result, 0, real_size));
 
     kernel<<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
     CHECK(cudaDeviceSynchronize());
