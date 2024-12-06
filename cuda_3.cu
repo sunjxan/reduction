@@ -2,14 +2,14 @@
 
 // 分多组，每个线程计算一个组的和
 
-__global__ void kernel(const real *A, size_t size, real *B, size_t thread_count)
+__global__ void kernel(const real *A, size_t size, real *B)
 {
     unsigned idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= size) {
         return;
     }
     real sum = 0.0;
-    for (size_t i = idx; i < size; i += thread_count) {
+    for (size_t i = idx; i < size; i += gridDim.x * blockDim.x) {
         sum += A[i];
     }
     B[idx] = sum;
@@ -25,7 +25,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaMallocHost(&h_B, B_size));
     CHECK(cudaMemset(d_B, 0, B_size));
     
-    kernel<<<grid_size, block_size>>>(d_A, size, d_B, thread_count);
+    kernel<<<grid_size, block_size>>>(d_A, size, d_B);
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_B, d_B, B_size, cudaMemcpyDeviceToHost));
