@@ -5,7 +5,7 @@
 __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count)
 {
     unsigned idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= thread_count) {
+    if (idx >= size) {
         return;
     }
     real sum = 0.0;
@@ -17,16 +17,18 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    size_t thread_count = DIVUP(size, 128), total_size = thread_count * real_size;
+    // 估算数组B的长度和需要的线程数groups，thread_count是实际使用的线程数
+    unsigned groups = DIVUP(size, 128), block_size = 256, grid_size = DIVUP(groups, block_size);
+    size_t thread_count = grid_size * block_size, B_size = thread_count * real_size;
     real *d_B = nullptr, *h_B = nullptr;
-    CHECK(cudaMalloc(&d_B, total_size));
-    CHECK(cudaMallocHost(&h_B, total_size));
-
-    unsigned block_size = 256, grid_size = DIVUP(thread_count, block_size);
+    CHECK(cudaMalloc(&d_B, B_size));
+    CHECK(cudaMallocHost(&h_B, B_size));
+    CHECK(cudaMemset(d_B, 0, B_size));
+    
     kernel<<<grid_size, block_size>>>(d_A, size, d_B, thread_count);
     CHECK(cudaDeviceSynchronize());
 
-    CHECK(cudaMemcpy(h_B, d_B, total_size, cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(h_B, d_B, B_size, cudaMemcpyDeviceToHost));
     real sum = 0.0;
     for (size_t i = 0; i < thread_count; ++i) {
         sum += h_B[i];

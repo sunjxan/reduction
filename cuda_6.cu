@@ -7,7 +7,7 @@
 __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count, real *C, unsigned times)
 {
     unsigned tid = threadIdx.x, bid = blockIdx.x, bdx = blockDim.x, idx = bid * bdx + tid;
-    if (idx >= thread_count) {
+    if (idx >= size) {
         return;
     }
 
@@ -23,12 +23,10 @@ __global__ void kernel(const real *A, size_t size, real *B, size_t thread_count,
     __syncthreads();
 
     real *Bx = B + bid * bdx;
-    for (size_t last_stride = bdx; last_stride > 1; ) {
-        size_t stride = (last_stride + 1) >> 1;
-        if (tid + stride < last_stride && idx + stride < thread_count) {
+    for (size_t stride = bdx >> 1; stride > 0; stride >>= 1) {
+        if (tid < stride) {
             Bx[tid] += Bx[tid + stride];
         }
-        last_stride = stride;
         __syncthreads();
     }
 
@@ -44,27 +42,31 @@ void reduce(const real *d_A, size_t size, real *h_result)
         return;
     }
 
-    unsigned times = 10;
-    size_t thread_count = DIVUP(size, times);
-    real *d_B = nullptr;
-    CHECK(cudaMalloc(&d_B, thread_count * real_size));
+    // 以1:times的比例估算数组B的长度和需要的线程数groups，block_size应是2的整数幂，thread_count是实际使用的线程数
+    unsigned times = 10, groups = DIVUP(size, times), block_size = 1024, grid_size = DIVUP(groups, block_size);
+    size_t thread_count = grid_size * block_size, B_size = thread_count * real_size, C_size = grid_size * real_size;
 
-    unsigned block_size = 1024, grid_size = DIVUP(thread_count, block_size);
-    size_t total_size = grid_size * real_size;
+    real *d_B = nullptr;
+    CHECK(cudaMalloc(&d_B, B_size));
+    // 为折半设置初值0
+    CHECK(cudaMemset(d_B, 0, B_size));
+
     real *d_C = nullptr, *h_C = nullptr;
-    CHECK(cudaMalloc(&d_C, total_size));
-    CHECK(cudaMallocHost(&h_C, total_size));
+    CHECK(cudaMalloc(&d_C, C_size));
+    CHECK(cudaMallocHost(&h_C, C_size));
 
     kernel<<<grid_size, block_size>>>(d_A, size, d_B, thread_count, d_C, times);
     CHECK(cudaDeviceSynchronize());
 
     // 保证grid_size=1,block_size=1024的kernel能完成全部计算
     times = DIVUP(grid_size, block_size);
-    thread_count = DIVUP(grid_size, times);
     real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
+    
+    // 为折半设置初值0
+    CHECK(cudaMemset(d_B, 0, B_size));
 
-    kernel<<<1, block_size>>>(d_C, grid_size, d_B, thread_count, d_result, times);
+    kernel<<<1, block_size>>>(d_C, grid_size, d_B, block_size, d_result, times);
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));
