@@ -1,7 +1,7 @@
 #include "common.hpp"
 
-// 每个block计算一个部分和，交错配对
-// 使用共享内存加速
+// 每个block计算一个部分和，顺序配对
+// 使用共享内存加速，相比相邻配对消除了共享内存bank冲突
 
 __global__ void kernel(const real *A, size_t size, real *B)
 {
