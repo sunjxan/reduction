@@ -8,6 +8,7 @@ __global__ void kernel(const real *A, size_t size, real *B)
     unsigned tid = threadIdx.x, bid = blockIdx.x, bdx = blockDim.x, idx = bid * bdx + tid;
     extern __shared__ real s_a[];
     if (idx >= size) {
+        s_a[tid] = 0.0;
         return;
     }
 
