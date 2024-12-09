@@ -20,12 +20,18 @@ __global__ void kernel(const real *A, size_t size, real *B)
     s_a[tid] = v;
     __syncthreads();
 
-    for (size_t stride = bdx >> 1; stride >= 32; stride >>= 1) {
+    for (size_t stride = bdx >> 1; stride > 32; stride >>= 1) {
         if (tid < stride) {
             s_a[tid] += s_a[tid + stride];
         }
         __syncthreads();
     }
+
+
+    if (tid < 32) {
+        s_a[tid] += s_a[tid + 32];
+    }
+    __syncwarp();
 
     v = s_a[tid];
     for (size_t stride = 16; stride > 0; stride >>= 1) {
