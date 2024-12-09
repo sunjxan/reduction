@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-// 使用线程束洗牌函数
+// 使用线程束内同步函数
 
 __global__ void kernel(const real *A, size_t size, real *B)
 {
@@ -27,19 +27,18 @@ __global__ void kernel(const real *A, size_t size, real *B)
         __syncthreads();
     }
 
-
     if (tid < 32) {
-        s_a[tid] += s_a[tid + 32];
-        __syncwarp();
-
-        v = s_a[tid];
-        for (size_t stride = 16; stride > 0; stride >>= 1) {
-            v += __shfl_down_sync(0xFFFFFFFF, v, stride);
-        }
+        volatile real *v_a = s_a;
+        v_a[tid] += v_a[tid + 32];
+        v_a[tid] += v_a[tid + 16];
+        v_a[tid] += v_a[tid + 8];
+        v_a[tid] += v_a[tid + 4];
+        v_a[tid] += v_a[tid + 2];
+        v_a[tid] += v_a[tid + 1];
     }
 
     if (!tid) {
-        B[bid] = v;
+        B[bid] = s_a[0];
     }
 }
 

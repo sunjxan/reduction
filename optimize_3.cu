@@ -33,13 +33,13 @@ __global__ void kernel(const real *A, size_t size, real *B)
 
     if (tid < 32) {
         s_a[tid] += s_a[tid + 32];
-    }
-    __syncwarp();
+        __syncwarp();
 
-    v = s_a[tid];
-    thread_block_tile<32> g = tiled_partition<32>(this_thread_block());
-    for (size_t stride = 16; stride > 0; stride >>= 1) {
-        v += g.shfl_down(v, stride);
+        v = s_a[tid];
+        thread_block_tile<32> g = tiled_partition<32>(this_thread_block());
+        for (size_t stride = 16; stride > 0; stride >>= 1) {
+            v += g.shfl_down(v, stride);
+        }
     }
 
     if (!tid) {

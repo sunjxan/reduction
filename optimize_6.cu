@@ -1,6 +1,10 @@
+#include <cooperative_groups.h>
+
 #include "common.hpp"
 
-// 使用线程束洗牌函数
+using namespace cooperative_groups;
+
+// 使用协作组
 
 __global__ void kernel(const real *A, size_t size, real *B)
 {
@@ -27,15 +31,17 @@ __global__ void kernel(const real *A, size_t size, real *B)
         __syncthreads();
     }
 
-
     if (tid < 32) {
         s_a[tid] += s_a[tid + 32];
         __syncwarp();
 
         v = s_a[tid];
-        for (size_t stride = 16; stride > 0; stride >>= 1) {
-            v += __shfl_down_sync(0xFFFFFFFF, v, stride);
-        }
+        thread_block_tile<32> g = tiled_partition<32>(this_thread_block());
+        v += g.shfl_down(v, 16);
+        v += g.shfl_down(v, 8);
+        v += g.shfl_down(v, 4);
+        v += g.shfl_down(v, 2);
+        v += g.shfl_down(v, 1);
     }
 
     if (!tid) {
