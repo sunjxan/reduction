@@ -1,7 +1,8 @@
 #include "common.hpp"
 
-// 每个block计算一个部分和，交错配对
+// 每个block计算一个部分和，相邻配对
 // 使用共享内存加速
+// 始终让threadIdx.x最小的部分线程工作，减少Warp分化的影响
 
 __global__ void kernel(const real *A, size_t size, real *B)
 {
@@ -12,18 +13,18 @@ __global__ void kernel(const real *A, size_t size, real *B)
         return;
     }
 
-    size_t pos = idx, thread_count = gridDim.x * blockDim.x;
+    size_t pos = idx * 2;
     real v = A[pos];
-    if (pos + thread_count < size) {
-        pos += thread_count;
-        v += A[pos];
+    if (pos + 1 < size) {
+        v += A[pos + 1];
     }
     s_a[tid] = v;
     __syncthreads();
 
-    for (size_t stride = bdx >> 1; stride > 0; stride >>= 1) {
-        if (tid < stride) {
-            s_a[tid] += s_a[tid + stride];
+    for (size_t stride = 1; stride < bdx; stride <<= 1) {
+        size_t index = tid * (stride << 1);
+        if (index < bdx) {
+            s_a[index] += s_a[index + stride];
         }
         __syncthreads();
     }

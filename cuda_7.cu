@@ -1,6 +1,8 @@
 #include "common.hpp"
 
-// 每个block计算一个部分和，交错配对
+// 为了代替最后传回host计算的步骤，调用两次kernel函数，直接归约成一个数
+// 受限于block_size<=1024，每个线程折半之前先累加times倍范围的元素
+// 为了第二个kernel可以一个block完成计算，需要调整times值
 // 使用共享内存加速
 
 __global__ void kernel(const real *A, size_t size, real *B)
@@ -14,7 +16,7 @@ __global__ void kernel(const real *A, size_t size, real *B)
 
     size_t pos = idx, thread_count = gridDim.x * blockDim.x;
     real v = A[pos];
-    if (pos + thread_count < size) {
+    while (pos + thread_count < size) {
         pos += thread_count;
         v += A[pos];
     }
@@ -35,26 +37,29 @@ __global__ void kernel(const real *A, size_t size, real *B)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    // 以1:2的比例估算需要的线程数groups，block_size应是2的整数幂
-    unsigned groups = DIVUP(size, 2), block_size = 1024, grid_size = DIVUP(groups, block_size);
+    // 以1:times的比例估算需要的线程数groups，block_size应是2的整数幂
+    unsigned times = 10, groups = DIVUP(size, times), block_size = 1024, grid_size = DIVUP(groups, block_size);
     size_t B_size = grid_size * real_size;
 
-    real *d_B = nullptr, *h_B = nullptr;
+    real *d_B = nullptr;
     CHECK(cudaMalloc(&d_B, B_size));
-    CHECK(cudaMallocHost(&h_B, B_size));
 
     kernel<<<grid_size, block_size, block_size * real_size>>>(d_A, size, d_B);
     CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
-    CHECK(cudaMemcpy(h_B, d_B, B_size, cudaMemcpyDeviceToHost));
-    real sum = 0.0;
-    for (size_t i = 0; i < grid_size; ++i) {
-        sum += h_B[i];
-    }
-    *h_result = sum;
+    // 保证grid_size=1,block_size=1024的kernel能完成全部计算
+    real *d_result = nullptr;
+    CHECK(cudaMalloc(&d_result, real_size));
+    CHECK(cudaMemset(d_result, 0, real_size));
 
-    CHECK(cudaFreeHost(h_B));
+    kernel<<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+    CHECK(cudaGetLastError());
+    CHECK(cudaDeviceSynchronize());
+
+    CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));
+
+    CHECK(cudaFree(d_result));
     CHECK(cudaFree(d_B));
 }
 
