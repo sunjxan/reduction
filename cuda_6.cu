@@ -45,6 +45,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaMalloc(&d_B, B_size));
 
     kernel<<<grid_size, block_size, block_size * real_size>>>(d_A, size, d_B);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
     // 保证grid_size=1,block_size=1024的kernel能完成全部计算
@@ -53,6 +54,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaMemset(d_result, 0, real_size));
 
     kernel<<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));

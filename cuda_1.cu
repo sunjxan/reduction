@@ -15,6 +15,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaMalloc(&d_result, real_size));
 
     kernel<<<1, 1>>>(d_A, size, d_result);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));

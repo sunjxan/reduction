@@ -19,6 +19,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
 
     unsigned block_size = 1024, grid_size = DIVUP(size, block_size);
     kernel<<<grid_size, block_size>>>(d_A, size, d_result);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));

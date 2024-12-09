@@ -26,6 +26,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaMemset(d_B, 0, B_size));
     
     kernel<<<grid_size, block_size>>>(d_A, size, d_B);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_B, d_B, B_size, cudaMemcpyDeviceToHost));

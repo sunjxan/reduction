@@ -8,7 +8,7 @@ __global__ void kernel(const real *A, size_t size, real *B)
     unsigned tid = threadIdx.x, bid = blockIdx.x, bdx = blockDim.x, idx = bid * bdx + tid;
     extern __shared__ real s_a[];
     if (idx >= size) {
-        s_a[tid] = 0.0;
+	s_a[tid] = 999.222;
         return;
     }
 
@@ -44,6 +44,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaMallocHost(&h_B, B_size));
 
     kernel<<<grid_size, block_size, block_size * real_size>>>(d_A, size, d_B);
+    CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
     CHECK(cudaMemcpy(h_B, d_B, B_size, cudaMemcpyDeviceToHost));
