@@ -2,7 +2,6 @@
 
 // 为了代替最后传回host计算的步骤，调用两次kernel函数，直接归约成一个数
 // 受限于block_size<=1024，每个线程折半之前先累加times倍范围的元素
-// 为了第二个kernel可以一个block完成计算，需要调整times值
 // 使用共享内存加速
 
 __global__ void kernel(const real *A, size_t size, real *B)
@@ -48,12 +47,13 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
-    // 保证grid_size=1,block_size=1024的kernel能完成全部计算
+    unsigned block_size2 = 512;
+
     real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
     CHECK(cudaMemset(d_result, 0, real_size));
 
-    kernel<<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+    kernel<<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
     CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
