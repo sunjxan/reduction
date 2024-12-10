@@ -48,7 +48,7 @@ __global__ void kernel(const real *A, size_t size, real *B)
 
 void reduce(const real *d_A, size_t size, real *h_result)
 {
-    // 以1:times的比例估算需要的线程数groups，block_size应是2的整数幂
+    // 以1:times的比例估算需要的线程数groups，block_size应是2的整数幂，且大于等于64
     unsigned times = 10, groups = DIVUP(size, times), block_size = 1024, grid_size = DIVUP(groups, block_size);
     size_t B_size = grid_size * real_size;
 
