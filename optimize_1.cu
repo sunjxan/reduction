@@ -27,11 +27,12 @@ __global__ void kernel(const real *A, size_t size, real *B)
         __syncthreads();
     }
 
-    for (size_t stride = 32; stride > 0; stride >>= 1) {
-        if (tid < stride) {
+    // 一个Warp内线程执行顺序是序号从小到大
+    if (tid < 32) {
+        for (size_t stride = 32; stride > 0; stride >>= 1) {
             s_a[tid] += s_a[tid + stride];
+            __syncwarp();
         }
-        __syncwarp();
     }
 
     if (!tid) {
