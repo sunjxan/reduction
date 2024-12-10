@@ -27,7 +27,7 @@ __global__ void kernel(const real *A, size_t size, real *B)
         __syncthreads();
     }
 
-    // 一个Warp内线程执行顺序是序号从小到大
+    // 一个Warp内线程执行顺序是序号从小到大，只要限定tid在一个Warp范围内即可
     if (tid < 32) {
         for (size_t stride = 32; stride > 0; stride >>= 1) {
             s_a[tid] += s_a[tid + stride];
