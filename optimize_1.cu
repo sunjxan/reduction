@@ -54,18 +54,12 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaDeviceSynchronize());
 
     unsigned block_size2 = 512;
-
-    real *d_result = nullptr;
-    CHECK(cudaMalloc(&d_result, real_size));
-    CHECK(cudaMemset(d_result, 0, real_size));
-
-    kernel<<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
+    kernel<<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_B);
     CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
-    CHECK(cudaMemcpy(h_result, d_result, real_size, cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(h_result, d_B, real_size, cudaMemcpyDeviceToHost));
 
-    CHECK(cudaFree(d_result));
     CHECK(cudaFree(d_B));
 }
 
