@@ -1,3 +1,4 @@
+# echo "cpu:"
 # nvcc -O2 -std=c++17 -Xcompiler -Wall cpu_1.cu -o a && ./a
 # nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cpu_1.cu -o a && ./a
 # nvcc -O2 -std=c++17 -Xcompiler -Wall cpu_2.cu -o a && ./a
@@ -11,6 +12,7 @@
 # nvcc -O2 -std=c++17 -Xcompiler -Wall cpu_6.cu -o a && ./a
 # nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cpu_6.cu -o a && ./a
 
+echo "cuda:"
 # nvcc -O2 -std=c++17 -Xcompiler -Wall cuda_1.cu -o a && ./a
 # nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cuda_1.cu -o a && ./a
 # nvcc -O2 -std=c++17 -Xcompiler -Wall cuda_2.cu -o a && ./a
@@ -26,9 +28,20 @@ nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cuda_6.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall cuda_7.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP cuda_7.cu -o a && ./a
 
+echo "optimize:"
 nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_1.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_1.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_2.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_2.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_3.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_3.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_4.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_4.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_5.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_5.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_6.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_6.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_7.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_7.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_8.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_8.cu -o a && ./a
