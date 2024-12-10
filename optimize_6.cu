@@ -4,7 +4,7 @@
 
 using namespace cooperative_groups;
 
-// 使用协作组
+// 展开核函数最后一个Warp，使用协作组
 
 __global__ void kernel(const real *A, size_t size, real *B)
 {
