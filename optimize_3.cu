@@ -33,7 +33,6 @@ __global__ void kernel(const real *A, size_t size, real *B)
 
     if (tid < 32) {
         s_a[tid] += s_a[tid + 32];
-        __syncwarp();
 
         v = s_a[tid];
         thread_block_tile<32> g = tiled_partition<32>(this_thread_block());
