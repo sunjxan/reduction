@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-// 使用线程束内同步函数
+// 展开核函数最后一个Warp
 
 __global__ void kernel(const real *A, size_t size, real *B)
 {
