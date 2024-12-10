@@ -96,26 +96,27 @@ void reduce(const real *d_A, size_t size, real *h_result)
     CHECK(cudaGetLastError());
     CHECK(cudaDeviceSynchronize());
 
-    // 保证grid_size=1,block_size=1024的kernel能完成全部计算
+    unsigned block_size2 = 512;
+
     real *d_result = nullptr;
     CHECK(cudaMalloc(&d_result, real_size));
     CHECK(cudaMemset(d_result, 0, real_size));
 
-    switch(block_size) {
+    switch(block_size2) {
         case 1024:
-            kernel<1024><<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+            kernel<1024><<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
             break;
         case 512:
-            kernel<512><<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+            kernel<512><<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
             break;
         case 256:
-            kernel<256><<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+            kernel<256><<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
             break;
         case 128:
-            kernel<128><<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+            kernel<128><<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
             break;
         case 64:
-            kernel<64><<<1, block_size, block_size * real_size>>>(d_B, grid_size, d_result);
+            kernel<64><<<1, block_size2, block_size2 * real_size>>>(d_B, grid_size, d_result);
             break;
     }
     CHECK(cudaGetLastError());
