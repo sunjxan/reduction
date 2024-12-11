@@ -21,9 +21,6 @@ __global__ void kernel(const real *A, size_t size, real *B)
     unsigned laneIdx = tid % warpSize, warpIdx = tid / warpSize, warp_count = DIVUP(bdx, warpSize);
     extern __shared__ real s_a[];
     if (idx >= size) {
-        if (!laneIdx) {
-            s_a[warpIdx] = 0.0;
-        }
         return;
     }
 

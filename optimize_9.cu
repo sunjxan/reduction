@@ -34,9 +34,6 @@ __global__ void kernel(const real *A, size_t size, real *B)
     const unsigned warp_count = DIVUP(blockSize, 32);
     extern __shared__ real s_a[];
     if (idx >= size) {
-        if (!laneIdx) {
-            s_a[warpIdx] = 0.0;
-        }
         return;
     }
 
