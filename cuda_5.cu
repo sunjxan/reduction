@@ -43,6 +43,7 @@ void reduce(const real *d_A, size_t size, real *h_result)
     real *d_B = nullptr, *h_B = nullptr;
     CHECK(cudaMalloc(&d_B, B_size));
     CHECK(cudaMallocHost(&h_B, B_size));
+    CHECK(cudaMemset(d_B, 0, B_size));
 
     kernel<<<grid_size, block_size, block_size * real_size>>>(d_A, size, d_B);
     CHECK(cudaGetLastError());
