@@ -45,3 +45,5 @@ nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_7.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_7.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_8.cu -o a && ./a
 nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_8.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall optimize_9.cu -o a && ./a
+nvcc -O2 -std=c++17 -Xcompiler -Wall -DUSE_DP optimize_9.cu -o a && ./a
